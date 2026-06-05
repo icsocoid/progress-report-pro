@@ -152,32 +152,23 @@ const RichTextEditor = () =>  {
         const selection = window.getSelection()
         if (!selection || !editorRef.current) return
 
-        const listTag = ordered ? "ol" : "ul"
-        const list = document.createElement(listTag)
-        const listItem = document.createElement("li")
-
-        if (selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0)
-            const selectedContent = range.extractContents()
-
-            if (selectedContent.textContent?.trim()) {
-                listItem.appendChild(selectedContent)
-            } else {
-                listItem.innerHTML = "<br>"
-            }
-
-            list.appendChild(listItem)
-            range.insertNode(list)
-
-            // Position cursor in the list item
-            const newRange = document.createRange()
-            newRange.setStart(listItem, 0)
-            newRange.setEnd(listItem, 0)
-            selection.removeAllRanges()
-            selection.addRange(newRange)
-        }
-
         editorRef.current.focus()
+
+        const command = ordered ? "insertOrderedList" : "insertUnorderedList"
+        const didCreateList = document.execCommand(command)
+
+        if (!didCreateList || selection.rangeCount === 0) return
+
+        let currentNode: Node | null = selection.anchorNode
+        let currentElement: HTMLElement | null =
+            currentNode instanceof HTMLElement ? currentNode : currentNode?.parentElement ?? null
+
+        const list = currentElement?.closest("ol, ul") as HTMLOListElement | HTMLUListElement | null
+
+        if (list) {
+            list.style.listStyleType = ordered ? "decimal" : "disc"
+            list.style.paddingLeft = "1.5rem"
+        }
     }, [])
 
     const adjustIndent = useCallback((increase: boolean) => {
