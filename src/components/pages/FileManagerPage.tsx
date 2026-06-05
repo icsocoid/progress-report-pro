@@ -467,7 +467,7 @@ const FileManagerPage = () => {
                                     }}
                                     className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100"
                                 >
-                                    <Plus size={20} />
+                                    <Plus size={20} /> New
                                 </button>
 
                                 {showAddMenu && (
