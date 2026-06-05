@@ -1086,6 +1086,7 @@ const FileManagerPage = () => {
             )}
 
         </Card>
+
     )
 };
 
