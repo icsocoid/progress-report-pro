@@ -3,6 +3,7 @@ import {
     FolderOpen,
     File,
     Upload,
+    Plus,
     Trash2,
     Edit,
     Share2,
@@ -58,6 +59,7 @@ const FileManagerPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [viewerState, setViewerState] = useState<FileViewerState>(null);
     const [viewerLoading, setViewerLoading] = useState(false);
+    const [showAddMenu, setShowAddMenu] = useState(false);
 
     const getFileExtension = (item: Item) => {
         if (item.extension) {
@@ -196,7 +198,10 @@ const FileManagerPage = () => {
     }, [currentFolderId, searchQuery]);
 
     useEffect(() => {
-        const handleClick = () => setContextMenu(null);
+        const handleClick = () => {
+            setContextMenu(null);
+            setShowAddMenu(false);
+        };
         window.addEventListener('click', handleClick);
         return () => window.removeEventListener('click', handleClick);
     }, []);
@@ -214,6 +219,7 @@ const FileManagerPage = () => {
         if (!renameValue.trim() || !showRenameModal?.id) return;
 
         setLoading(true);
+
         try {
             await axios.put(`${apiUrl}/api/files/${id}`,{
                 name: renameValue
@@ -305,11 +311,11 @@ const FileManagerPage = () => {
     const deleteItem = async(id: number) => {
         try {
             const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/files/${id}`);
-            
+
             // Optimistic update: remove item from state immediately using the returned ID
             if (response.data.status === 'success') {
                 setItems(prevItems => prevItems.filter(item => item.id !== response.data.id));
-                
+
                 toast({
                     title: "Berhasil",
                     description: response.data.message || "File berhasil dihapus",
@@ -321,9 +327,9 @@ const FileManagerPage = () => {
             setContextMenu(null);
         } catch (error: any) {
             console.error("Gagal untuk hapus:", error);
-            
+
             let errorMessage = "Ada kesalahan saat menghapus data. Silahkan coba lagi.";
-            
+
             if (error.response) {
                 switch (error.response.status) {
                     case 403:
@@ -452,6 +458,57 @@ const FileManagerPage = () => {
                     {/* Header */}
                     <div className="border-b px-6 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-4">
+                            <div className="relative">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowAddMenu((prev) => !prev);
+                                        setContextMenu(null);
+                                    }}
+                                    className="p-2 rounded-lg border border-gray-200 hover:bg-gray-100"
+                                >
+                                    <Plus size={20} />
+                                </button>
+
+                                {showAddMenu && (
+                                    <div
+                                        className="absolute left-0 top-full mt-2 bg-white shadow-lg rounded-lg py-2 w-48 z-50 border"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <button
+                                            onClick={() => {
+                                                setShowNewModal('folder');
+                                                setShowAddMenu(false);
+                                                setContextMenu(null);
+                                            }}
+                                            className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
+                                        >
+                                            <FolderOpen size={16} /> Buat Folder
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowNewModal('file');
+                                                setShowAddMenu(false);
+                                                setContextMenu(null);
+                                            }}
+                                            className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
+                                        >
+                                            <File size={16} /> Buat File
+                                        </button>
+                                        <hr className="my-2" />
+                                        <button
+                                            onClick={() => {
+                                                fileInputRef.current?.click();
+                                                setShowAddMenu(false);
+                                                setContextMenu(null);
+                                            }}
+                                            className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
+                                        >
+                                            <Upload size={16} /> Upload file
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-4 py-2 w-96">
                                 <Search size={20} className="text-gray-500" />
                                 <input
