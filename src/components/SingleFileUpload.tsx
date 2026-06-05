@@ -29,9 +29,12 @@ const SingleFileUpload = ({
     const [isDragOver, setIsDragOver] = useState<boolean>(false)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const filesRef = useRef<FileWithPreview[]>(fileUploads)
+    const dragCounterRef = useRef(0)
 
     useEffect(() => {
         setFiles(fileUploads)
+        filesRef.current = fileUploads
     }, [fileUploads])
 
     const processFiles = useCallback((fileList: FileList) => {
@@ -50,24 +53,30 @@ const SingleFileUpload = ({
             return fileWithPreview
         })
 
-        let updatedFiles: FileWithPreview[] = []
-        setFiles((prev) => {
-            updatedFiles = [...prev, ...newFiles]
-            return updatedFiles
-        })
+        const updatedFiles = [...filesRef.current, ...newFiles]
+        filesRef.current = updatedFiles
+        setFiles(updatedFiles)
 
 
         // Simulate upload progress
         newFiles.forEach((file) => {
             const interval = setInterval(() => {
-                setFiles((prev) =>
-                    prev.map((f) => (f.id === file.id ? { ...f, progress: Math.min((f.progress || 0) + 10, 100) } : f)),
-                )
+                setFiles((prev) => {
+                    const nextFiles = prev.map((f) =>
+                        f.id === file.id ? { ...f, progress: Math.min((f.progress || 0) + 10, 100) } : f,
+                    )
+                    filesRef.current = nextFiles
+                    return nextFiles
+                })
             }, 200)
 
             setTimeout(() => {
                 clearInterval(interval)
-                setFiles((prev) => prev.map((f) => (f.id === file.id ? { ...f, progress: 100 } : f)))
+                setFiles((prev) => {
+                    const nextFiles = prev.map((f) => (f.id === file.id ? { ...f, progress: 100 } : f))
+                    filesRef.current = nextFiles
+                    return nextFiles
+                })
             }, 2000)
         })
         onSelectFiles(updatedFiles)
@@ -76,6 +85,8 @@ const SingleFileUpload = ({
     const handleDrop = useCallback(
         (e: React.DragEvent) => {
             e.preventDefault()
+            e.stopPropagation()
+            dragCounterRef.current = 0
             setIsDragOver(false)
 
             const droppedFiles = e.dataTransfer.files
@@ -86,14 +97,28 @@ const SingleFileUpload = ({
         [processFiles],
     )
 
+    const handleDragEnter = useCallback((e: React.DragEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        dragCounterRef.current += 1
+        setIsDragOver(true)
+    }, [])
+
     const handleDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault()
+        e.stopPropagation()
+        e.dataTransfer.dropEffect = "copy"
         setIsDragOver(true)
     }, [])
 
     const handleDragLeave = useCallback((e: React.DragEvent) => {
         e.preventDefault()
-        setIsDragOver(false)
+        e.stopPropagation()
+        dragCounterRef.current = Math.max(0, dragCounterRef.current - 1)
+
+        if (dragCounterRef.current === 0) {
+            setIsDragOver(false)
+        }
     }, [])
 
     const handleFileSelect = useCallback(
@@ -102,6 +127,7 @@ const SingleFileUpload = ({
             if (selectedFiles && selectedFiles.length > 0) {
                 processFiles(selectedFiles)
             }
+            e.target.value = ""
         },
         [processFiles],
     )
@@ -113,6 +139,7 @@ const SingleFileUpload = ({
                 URL.revokeObjectURL(fileToRemove.preview)
             }
             const updatedFiles = prev.filter((f) => f.id !== fileId)
+            filesRef.current = updatedFiles
             onSelectFiles(updatedFiles)
             return updatedFiles
         })
@@ -128,6 +155,7 @@ const SingleFileUpload = ({
                 URL.revokeObjectURL(file.preview)
             }
         })
+        filesRef.current = []
         setFiles([])
         onSelectFiles([])
     }
@@ -146,6 +174,7 @@ const SingleFileUpload = ({
                     isDragOver ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50",
                 )}
                 onDrop={handleDrop}
+                onDragEnter={handleDragEnter}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={openFileDialog}
