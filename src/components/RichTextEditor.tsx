@@ -18,7 +18,7 @@ import {
     ListOrdered,
     Indent,
     Outdent,
-    ImageIcon, Save, Loader2,
+    ImageIcon, Save, Loader2, AlignJustify,
 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {useParams} from "react-router-dom";
@@ -466,6 +466,9 @@ const RichTextEditor = () =>  {
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => applyAlignment("right")} className="p-2">
                         <AlignRight className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => applyAlignment("justify")} className="p-2">
+                        <AlignJustify className="w-4 h-4" />
                     </Button>
 
                     <Separator orientation="vertical" className="h-6 mx-2" />
