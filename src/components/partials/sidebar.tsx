@@ -2,7 +2,7 @@ import {
     BarChart3,
     LayoutDashboard,
     Layers, Notebook, Search, LetterText, Code, Receipt, LucideListTodo, Library, ShieldCheck,
-    Menu,
+    Menu, Wrench,
     type LucideIcon,
 } from "lucide-react"
 import {
@@ -32,6 +32,7 @@ type NavigationItem = {
     icon: LucideIcon;
     section?: "main" | "master" | "management" | "setting";
     adminOnly?: boolean;
+    external?: boolean;
     match?: string[];
 }
 
@@ -100,6 +101,13 @@ const navigationItems: NavigationItem[] = [
         match: ["/file-manager", "/edit-file"],
     },
     {
+        title: "Toolbox",
+        path: "https://toolbox.icso.biz.id/",
+        icon: Wrench,
+        section: "management",
+        external: true,
+    },
+    {
         title: "Approval",
         path: "/akses-approval",
         icon: ShieldCheck,
@@ -134,10 +142,17 @@ function SidebarNavigationItem({item, active}: { item: NavigationItem; active: b
     return (
         <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                <Link to={item.path} className="group">
-                    <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />
-                    <span>{item.title}</span>
-                </Link>
+                {item.external ? (
+                    <a href={item.path} target="_blank" rel="noreferrer" className="group">
+                        <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />
+                        <span>{item.title}</span>
+                    </a>
+                ) : (
+                    <Link to={item.path} className="group">
+                        <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />
+                        <span>{item.title}</span>
+                    </Link>
+                )}
             </SidebarMenuButton>
         </SidebarMenuItem>
     )
