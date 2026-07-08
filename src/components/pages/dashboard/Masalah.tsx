@@ -99,13 +99,13 @@ const MasalahPage = () => {
         //if (meta?.total <= 1) return null
 
         return (
-            <div className="flex items-center justify-between mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mb-6 flex flex-col gap-3 rounded-lg bg-gray-50 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <div className="text-sm text-muted-foreground">
                     Showing {meta?.current_page} of {meta?.last_page}
                 </div>
                 <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                     <PopoverTrigger asChild>
-                        <Button variant="outline" className="min-w-[200px] justify-between">
+                        <Button variant="outline" className="w-full justify-between sm:w-auto sm:min-w-[200px]">
                             <Filter className="w-4 h-4 mr-2" />
                             {getFilterSummary()}
                             <ChevronDown className="w-4 h-4" />
@@ -161,7 +161,7 @@ const MasalahPage = () => {
                         </div>
                     </PopoverContent>
                 </Popover>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <Button
                         variant="outline"
                         size="sm"
@@ -172,7 +172,7 @@ const MasalahPage = () => {
                         Previous
                     </Button>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex max-w-full flex-wrap items-center gap-1">
                         {Array.from({ length: totalPage ?? 0 }, (_, i) => (
                             <Button
                                 key={i + 1}
@@ -245,7 +245,8 @@ const MasalahPage = () => {
 
                         </div>
                     </div>
-                    <table className="w-full">
+                    <div className="overflow-x-auto rounded-md border">
+                    <table className="w-full min-w-[640px]">
                         <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Pekerjaan</th>
@@ -277,6 +278,7 @@ const MasalahPage = () => {
                         ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             ))}
         </div>
@@ -296,7 +298,7 @@ const MasalahPage = () => {
     const isEqualTask = (a?: JobTask, b?: JobTask) => a?.id === b?.id
 
     return(
-        <div className="w-full mx-auto p-6">
+        <div className="mx-auto w-full min-w-0">
             <h1 className="text-2xl font-bold mb-6">Temuan</h1>
             {renderParentPagination()}
             <Accordion type="single" collapsible className="w-full">

@@ -339,11 +339,11 @@ const DocsEditor = ({dataProgress}: DataRepresentative) =>  {
     }, [])
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen min-w-0 overflow-hidden bg-gray-50">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 px-4 py-2">
-                <div className="flex items-center justify-between max-w-6xl mx-auto">
-                    <div className="flex items-center gap-4">
+                <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                         <div className="flex items-center gap-2">
                             <FileText className="w-6 h-6 text-blue-600" />
                             <span className="text-xl font-medium text-gray-700">Docs</span>
@@ -351,11 +351,11 @@ const DocsEditor = ({dataProgress}: DataRepresentative) =>  {
                         <Input
                             value={documentTitle}
                             onChange={(e) => setDocumentTitle(e.target.value)}
-                            className="text-lg font-medium border-none shadow-none focus-visible:ring-0 px-2 py-1 h-auto"
+                            className="h-auto min-w-0 px-2 py-1 text-lg font-medium border-none shadow-none focus-visible:ring-0"
                             placeholder="Untitled Document"
                         />
                     </div>
-                    <Button onClick={exportToPDF} className="gap-2">
+                    <Button onClick={exportToPDF} className="w-full gap-2 sm:w-auto">
                         <Download className="w-4 h-4" />
                         Export PDF
                     </Button>
@@ -364,7 +364,7 @@ const DocsEditor = ({dataProgress}: DataRepresentative) =>  {
 
             {/* Toolbar */}
             <div className="bg-white border-b border-gray-200 px-4 py-2">
-                <div className="flex items-center gap-2 max-w-6xl mx-auto">
+                <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2">
                     <Button variant="ghost" size="sm" onClick={handleUndo} className="p-2">
                         <Undo className="w-4 h-4" />
                     </Button>
@@ -462,12 +462,12 @@ const DocsEditor = ({dataProgress}: DataRepresentative) =>  {
             </div>
 
             {/* Document Editor */}
-            <div className="flex justify-center py-8">
-                <div className="bg-white shadow-lg" style={{ width: "8.5in", minHeight: "11in" }}>
+            <div className="overflow-x-auto px-3 py-6 sm:px-6 sm:py-8">
+                <div className="mx-auto bg-white shadow-lg" style={{ width: "100%", maxWidth: "8.5in", minHeight: "11in" }}>
                     <div
                         ref={editorRef}
                         contentEditable
-                        className="p-16 min-h-full outline-none prose prose-lg max-w-none"
+                        className="min-h-full max-w-none p-6 outline-none prose prose-sm sm:prose-lg sm:p-16"
                         style={{
                             fontFamily: fontFamily,
                             fontSize: `${fontSize}px`,

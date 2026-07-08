@@ -108,14 +108,14 @@ const RepresenPage = () => {
 
 
     return(
-        <div className="w-full">
-            <Card>
+        <div className="w-full min-w-0">
+            <Card className="min-w-0">
                 <CardHeader>
                     <CardTitle>Representative Letter </CardTitle>
                     <CardDescription>Manage representative letter</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <CardContent className="min-w-0">
+                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
                         <div className="space-y-2">
                             <Label htmlFor="client">Client</Label>
                             <SearchableSelect<Client>
@@ -128,13 +128,13 @@ const RepresenPage = () => {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="job">Tanggal</Label>
-                            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                                 <Popover open={isOpen} onOpenChange={setIsOpen}>
                                     <PopoverTrigger asChild>
                                         <Button
                                             variant="outline"
                                             className={cn(
-                                                "w-full sm:w-[300px] justify-start text-left font-normal",
+                                                "w-full justify-start text-left font-normal sm:w-[300px]",
                                                 !hasDateRange && "text-muted-foreground",
                                             )}
                                         >
@@ -142,7 +142,7 @@ const RepresenPage = () => {
                                             {formatDateRange()}
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
+                                    <PopoverContent className="w-[calc(100vw-2rem)] max-w-[640px] p-0" align="start">
                                         <div className="p-4 space-y-4">
                                             <Calendar
                                                 mode="range"
@@ -169,7 +169,7 @@ const RepresenPage = () => {
                                         <span className="sr-only">Clear date range</span>
                                     </Button>
                                 )}
-                                <Button variant="outline" onClick={applyFilter}>
+                                <Button variant="outline" onClick={applyFilter} className="w-full sm:w-auto">
                                     {loading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -184,7 +184,7 @@ const RepresenPage = () => {
                     <div className="flex flex-col sm:flex-row gap-4 mt-4">
 
                     </div>
-                    <div className=" mt-4">
+                    <div className="mt-4 min-w-0">
                         <DocsEditor dataProgress={progressReport} />
                     </div>
                 </CardContent>

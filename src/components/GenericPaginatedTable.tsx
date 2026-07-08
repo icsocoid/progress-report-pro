@@ -91,12 +91,12 @@ export function GenericPaginatedTable<TData>({
     }, [rowSelection]);
 
     return (
-        <Card>
+        <Card className="min-w-0">
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
                 <CardDescription>{description}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="min-w-0">
                 <div className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                         <div className="relative">
@@ -111,7 +111,7 @@ export function GenericPaginatedTable<TData>({
                     </div>
                     {
                         addUrl !== "" ? <div className="flex gap-2">
-                            <Link to={addUrl || ""} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                            <Link to={addUrl || ""} className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 sm:w-auto">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Tambah
                             </Link>
@@ -120,7 +120,7 @@ export function GenericPaginatedTable<TData>({
 
                 </div>
 
-                <div className="rounded-md border">
+                <div className="overflow-x-auto rounded-md border">
                     <Table>
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
@@ -167,11 +167,11 @@ export function GenericPaginatedTable<TData>({
                     </Table>
                 </div>
 
-                <div className="flex items-center justify-end space-x-2 py-4">
+                <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-end">
                     <div className="flex-1 text-sm text-muted-foreground">
                         Page {pagination.pageIndex + 1} of {totalPages}
                     </div>
-                    <div className="space-x-2">
+                    <div className="flex gap-2">
                         <Button
                             variant="outline"
                             size="sm"

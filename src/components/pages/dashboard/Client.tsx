@@ -54,11 +54,11 @@ const DashboardClientPage = () => {
         //if (meta?.total <= 1) return null
 
         return (
-            <div className="flex items-center justify-between mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mb-6 flex flex-col gap-3 rounded-lg bg-gray-50 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <div className="text-sm text-muted-foreground">
                     Showing {meta?.current_page} of {meta?.last_page}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <Button
                         variant="outline"
                         size="sm"
@@ -69,7 +69,7 @@ const DashboardClientPage = () => {
                         Previous
                     </Button>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex max-w-full flex-wrap items-center gap-1">
                         {
                             Array.from({ length: totalPage ?? 0 }, (_, i) => (
                             <Button
@@ -119,11 +119,11 @@ const DashboardClientPage = () => {
         //if (meta?.total <= 1) return null
 
         return (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t">
+            <div className="mt-4 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <div className="text-sm text-muted-foreground">
                     Showing {metaProgress?.current_page} of {metaProgress?.last_page}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <Button
                         variant="outline"
                         size="sm"
@@ -134,7 +134,7 @@ const DashboardClientPage = () => {
                         Previous
                     </Button>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex max-w-full flex-wrap items-center gap-1">
                         {Array.from({ length: metaProgress?.last_page ?? 0 }, (_, i) => (
                             <Button
                                 key={i + 1}
@@ -166,14 +166,14 @@ const DashboardClientPage = () => {
         <div className="space-y-3">
             {items.map((item) => (
                 <Card key={item.id} className="p-4">
-                    <div className="flex items-center justify-between">
-                        <div>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
                             <h4 className="font-medium">{bulanIndo[parseInt(item.bulan, 10) - 1]} {item.tahun}</h4>
                             <p className="text-sm text-muted-foreground">
                                 {item.nama_jasa}
                             </p>
                         </div>
-                        <div className="text-right">
+                        <div className="break-words text-left sm:text-right">
                            <a href={`/progress/detail/${item.id}`} target="_blank">{item.nomor} / {convertIndonesiaFormat(item.tanggal)}</a>
                         </div>
                     </div>
@@ -195,7 +195,7 @@ const DashboardClientPage = () => {
     }
 
     return (
-        <div className="w-full mx-auto p-6">
+        <div className="mx-auto w-full min-w-0">
             <h1 className="text-2xl font-bold mb-6">Progress Report</h1>
 
             {renderParentPagination()}
