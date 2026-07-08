@@ -2,6 +2,8 @@ import {
     BarChart3,
     LayoutDashboard,
     Layers, Notebook, Search, LetterText, Code, Receipt, LucideListTodo, Library, ShieldCheck,
+    Menu,
+    type LucideIcon,
 } from "lucide-react"
 import {
     Sidebar,
@@ -16,20 +18,144 @@ import {
     SidebarGroupLabel,
     SidebarGroupContent,
     SidebarSeparator,
+    useSidebar,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {useUser} from "@/models/user.ts";
 import {getInitialsLimited, shortenEmail} from "@/utils/helpers.ts";
 import {Link, useLocation} from "react-router-dom";
+import {cn} from "@/lib/utils.ts";
+
+type NavigationItem = {
+    title: string;
+    path: string;
+    icon: LucideIcon;
+    section?: "main" | "master" | "management" | "setting";
+    adminOnly?: boolean;
+    match?: string[];
+}
+
+const navigationItems: NavigationItem[] = [
+    {
+        title: "Dashboard",
+        path: "/dashboard",
+        icon: LayoutDashboard,
+        section: "main",
+        match: ["/", "/dashboard"],
+    },
+    {
+        title: "Pekerjaan",
+        path: "/jobs",
+        icon: BarChart3,
+        section: "master",
+        match: ["/jobs", "/job"],
+    },
+    {
+        title: "Todo",
+        path: "/todo",
+        icon: LucideListTodo,
+        section: "master",
+        match: ["/todo", "/addtodo"],
+    },
+    {
+        title: "Progress",
+        path: "/progress",
+        icon: Receipt,
+        section: "management",
+        match: ["/progress", "/addprogress"],
+    },
+    {
+        title: "Temuan",
+        path: "/temuan",
+        icon: Search,
+        section: "management",
+        match: ["/temuan", "/addtemuan"],
+    },
+    {
+        title: "Solusi",
+        path: "/solusi",
+        icon: Code,
+        section: "management",
+        match: ["/solusi", "/addsolusi"],
+    },
+    {
+        title: "Representative",
+        path: "/representative",
+        icon: LetterText,
+        section: "management",
+        match: ["/representative"],
+    },
+    {
+        title: "Notulen",
+        path: "/notulen",
+        icon: Notebook,
+        section: "management",
+        match: ["/notulen", "/addnotulen"],
+    },
+    {
+        title: "Library",
+        path: "/file-manager",
+        icon: Library,
+        section: "management",
+        match: ["/file-manager", "/edit-file"],
+    },
+    {
+        title: "Approval",
+        path: "/akses-approval",
+        icon: ShieldCheck,
+        section: "setting",
+        adminOnly: true,
+        match: ["/akses-approval"],
+    },
+]
+
+const mobilePrimaryPaths = ["/dashboard", "/progress", "/temuan", "/solusi"];
+const mobilePrimaryItems = navigationItems.filter((item) => mobilePrimaryPaths.includes(item.path));
+
+const canAccessItem = (item: NavigationItem, accessApprovalSetting: boolean) => {
+    return !item.adminOnly || accessApprovalSetting;
+}
+
+const isNavigationItemActive = (pathname: string, item: NavigationItem) => {
+    const matches = item.match ?? [item.path];
+
+    return matches.some((path) => {
+        if (path === "/") {
+            return pathname === "/";
+        }
+
+        return pathname === path || pathname.startsWith(`${path}/`);
+    });
+}
+
+function SidebarNavigationItem({item, active}: { item: NavigationItem; active: boolean }) {
+    const Icon = item.icon;
+
+    return (
+        <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
+                <Link to={item.path} className="group">
+                    <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />
+                    <span>{item.title}</span>
+                </Link>
+            </SidebarMenuButton>
+        </SidebarMenuItem>
+    )
+}
 
 export function DashboardSidebar() {
     const user = useUser()
     const location = useLocation();
+    const {isMobile} = useSidebar();
     const canAccessApprovalSetting = [1, 2, 3].includes(user?.jabatan?.tingkat ?? 0);
+    const getItems = (section: NavigationItem["section"]) => navigationItems
+        .filter((item) => item.section === section && canAccessItem(item, canAccessApprovalSetting))
+        .filter((item) => !isMobile || !mobilePrimaryPaths.includes(item.path));
+    const mainItems = getItems("main");
+    const masterItems = getItems("master");
+    const managementItems = getItems("management");
+    const settingItems = getItems("setting");
 
-
-
-    const isActive = (path: string) => location.pathname === path
     return (
         <Sidebar className="border-r">
             <SidebarHeader className="pb-0">
@@ -42,118 +168,71 @@ export function DashboardSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={isActive('/dashboard')} tooltip="Dashboard">
-                                    <Link to="/dashboard" className="group">
-                                        <LayoutDashboard className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                        <span>Dashboard</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-                <SidebarGroup>
-                    <SidebarGroupLabel>Master</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={isActive('/jobs')} tooltip="Analytics">
-                                    <Link to="/jobs" className="group">
-                                        <BarChart3 className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                        <span>Pekerjaan</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={isActive('/todo')} tooltip="Analytics">
-                                    <Link to="/todo" className="group">
-                                        <LucideListTodo className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                        <span>Todo</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                {mainItems.length > 0 ? (
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                {mainItems.map((item) => (
+                                    <SidebarNavigationItem
+                                        key={item.path}
+                                        item={item}
+                                        active={isNavigationItemActive(location.pathname, item)}
+                                    />
+                                ))}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                ) : null}
+                {masterItems.length > 0 ? (
+                    <SidebarGroup>
+                        <SidebarGroupLabel>Master</SidebarGroupLabel>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                {masterItems.map((item) => (
+                                    <SidebarNavigationItem
+                                        key={item.path}
+                                        item={item}
+                                        active={isNavigationItemActive(location.pathname, item)}
+                                    />
+                                ))}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                ) : null}
 
                 <SidebarSeparator />
 
-                <SidebarGroup>
-                    <SidebarGroupLabel>Management</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={isActive('/progress')} tooltip="Products">
-                                    <Link to="/progress" className="group">
-                                        <Receipt className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                        <span>Progress Report</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={isActive('/temuan')} tooltip="Solusi">
-                                    <Link to="/temuan" className="group">
-                                        <Search className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                        <span>Temuan</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={isActive('/solusi')} tooltip="Solusi">
-                                    <Link to="/solusi" className="group">
-                                        <Code className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                        <span>Solusi</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={isActive('/representative')} tooltip="Solusi">
-                                    <Link to="/representative" className="group">
-                                        <LetterText className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                        <span>Representative Letter</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={isActive('/notulen')} tooltip="Solusi">
-                                    <Link to="/notulen" className="group">
-                                        <Notebook className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                        <span>Notulen Meeting</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild isActive={isActive('/file-manager')} tooltip="Solusi">
-                                    <Link to="/file-manager" className="group">
-                                        <Library className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                        <span>Library</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                {managementItems.length > 0 ? (
+                    <SidebarGroup>
+                        <SidebarGroupLabel>Management</SidebarGroupLabel>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                {managementItems.map((item) => (
+                                    <SidebarNavigationItem
+                                        key={item.path}
+                                        item={item}
+                                        active={isNavigationItemActive(location.pathname, item)}
+                                    />
+                                ))}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                ) : null}
 
                 <SidebarSeparator />
 
-                {canAccessApprovalSetting ? (
+                {settingItems.length > 0 ? (
                     <SidebarGroup>
                         <SidebarGroupLabel>Setting</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
-                                <SidebarMenuItem>
-                                    <SidebarMenuButton asChild isActive={isActive('/akses-approval')} tooltip="Akses Approval">
-                                        <Link to="/akses-approval" className="group">
-                                            <ShieldCheck className="h-4 w-4 transition-colors group-hover:text-primary" />
-                                            <span>Akses Approval</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
+                                {settingItems.map((item) => (
+                                    <SidebarNavigationItem
+                                        key={item.path}
+                                        item={item}
+                                        active={isNavigationItemActive(location.pathname, item)}
+                                    />
+                                ))}
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>
@@ -176,5 +255,54 @@ export function DashboardSidebar() {
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>
+    )
+}
+
+export function MobileBottomNavigation() {
+    const user = useUser()
+    const location = useLocation();
+    const {setOpenMobile} = useSidebar();
+    const canAccessApprovalSetting = [1, 2, 3].includes(user?.jabatan?.tingkat ?? 0);
+    const items = mobilePrimaryItems.filter((item) => canAccessItem(item, canAccessApprovalSetting));
+    const isMenuActive = navigationItems
+        .filter((item) => !mobilePrimaryPaths.includes(item.path) && canAccessItem(item, canAccessApprovalSetting))
+        .some((item) => isNavigationItemActive(location.pathname, item));
+
+    return (
+        <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur md:hidden">
+            <div className="grid grid-cols-5 gap-1 px-1">
+                {items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isNavigationItemActive(location.pathname, item);
+
+                    return (
+                        <Link
+                            key={item.path}
+                            to={item.path}
+                            aria-current={active ? "page" : undefined}
+                            className={cn(
+                                "flex min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-center text-[10px] font-medium leading-tight text-muted-foreground transition-colors",
+                                active && "bg-primary text-primary-foreground"
+                            )}
+                        >
+                            <Icon className="h-5 w-5 shrink-0" />
+                            <span className="line-clamp-2 min-h-6 max-w-full">{item.title}</span>
+                        </Link>
+                    )
+                })}
+                <button
+                    type="button"
+                    aria-current={isMenuActive ? "page" : undefined}
+                    onClick={() => setOpenMobile(true)}
+                    className={cn(
+                        "flex min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-center text-[10px] font-medium leading-tight text-muted-foreground transition-colors",
+                        isMenuActive && "bg-primary text-primary-foreground"
+                    )}
+                >
+                    <Menu className="h-5 w-5 shrink-0" />
+                    <span className="min-h-6">Menu</span>
+                </button>
+            </div>
+        </nav>
     )
 }
