@@ -454,10 +454,10 @@ const FileManagerPage = () => {
                 <CardTitle>Library</CardTitle>
             </CardHeader>
             <CardContent >
-                <div className="h-screen bg-white flex flex-col">
+                <div className="flex min-h-[calc(100svh-8rem)] flex-col bg-white">
                     {/* Header */}
-                    <div className="border-b px-6 py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                    <div className="flex flex-col gap-3 border-b px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                             <div className="relative">
                                 <button
                                     onClick={(e) => {
@@ -509,7 +509,7 @@ const FileManagerPage = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-4 py-2 w-96">
+                            <div className="flex w-full items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 sm:w-96">
                                 <Search size={20} className="text-gray-500" />
                                 <input
                                     type="text"
@@ -520,7 +520,7 @@ const FileManagerPage = () => {
                                 />
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             {loading && <Loader2 size={20} className="animate-spin text-blue-500" />}
                             {viewerLoading && <Loader2 size={20} className="animate-spin text-slate-500" />}
                             <button
@@ -544,7 +544,7 @@ const FileManagerPage = () => {
 
                         {/* Files Area */}
                         <div
-                            className="flex-1 p-6 overflow-auto"
+                            className="flex-1 overflow-auto p-3 sm:p-6"
                             onContextMenu={handleContextMenu}
                         >
                             <div className="flex items-center gap-2 mb-4">
@@ -578,7 +578,7 @@ const FileManagerPage = () => {
                                 </div>
                             )}
 
-                            <div className={viewMode === 'grid' ? 'grid grid-cols-5 gap-4' : 'space-y-1'}>
+                            <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 sm:gap-4' : 'space-y-1'}>
                                 {items.map(item => (
                                     <div
                                         key={item.id}
@@ -717,7 +717,7 @@ const FileManagerPage = () => {
                     {/* New Item Modal */}
                     {showNewModal && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-lg p-6 w-96">
+                            <div className="w-[calc(100vw-2rem)] max-w-sm rounded-lg bg-white p-4 sm:p-6">
                                 <h3 className="text-xl mb-4">New {showNewModal}</h3>
                                 <input
                                     type="text"
@@ -752,7 +752,7 @@ const FileManagerPage = () => {
                     {/* Share Modal */}
                     {showShareModal && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-lg p-6 w-[500px] max-h-[600px] overflow-y-auto">
+                            <div className="max-h-[85svh] w-[calc(100vw-2rem)] max-w-lg overflow-y-auto rounded-lg bg-white p-4 sm:p-6">
                                 <h3 className="text-xl font-medium mb-4">Share "{showShareModal.name}"</h3>
 
                                 {/* Add People */}
@@ -908,16 +908,16 @@ const FileManagerPage = () => {
                     )}
 
                     {viewerState && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 sm:p-4">
                             <div className="flex h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-                                <div className="flex items-center justify-between border-b px-5 py-4">
+                                <div className="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
                                     <div className="min-w-0">
                                         <p className="truncate text-lg font-medium">{viewerState.item.name}</p>
                                         <p className="text-sm text-gray-500">
                                             {getViewerLabel(viewerState.kind)} preview
                                         </p>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-wrap items-center gap-2">
                                         {viewerState.source && (
                                             <button
                                                 type="button"
@@ -1025,7 +1025,7 @@ const FileManagerPage = () => {
             </CardContent>
             {showRenameModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-96">
+                    <div className="w-[calc(100vw-2rem)] max-w-sm rounded-lg bg-white p-4 sm:p-6">
                         <h3 className="text-xl mb-4">Rename</h3>
                         <input
                             type="text"
@@ -1059,7 +1059,7 @@ const FileManagerPage = () => {
 
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-96">
+                    <div className="w-[calc(100vw-2rem)] max-w-sm rounded-lg bg-white p-4 sm:p-6">
                         <h3 className="text-xl mb-4">Konfirmasi Hapus</h3>
                         <p className="mb-4 text-gray-600">
                             Apakah Anda yakin ingin menghapus "{showDeleteConfirm.name}"? Tindakan ini tidak dapat dibatalkan.
