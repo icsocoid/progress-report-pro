@@ -54,11 +54,11 @@ const DashboardClientPage = () => {
         //if (meta?.total <= 1) return null
 
         return (
-            <div className="mb-6 flex flex-col gap-3 rounded-lg bg-gray-50 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                <div className="text-sm text-muted-foreground">
+            <div className="mb-6 flex min-w-0 flex-col gap-3 rounded-lg border border-primary/10 bg-white p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:p-4">
+                <div className="shrink-0 text-sm text-muted-foreground">
                     Showing {meta?.current_page} of {meta?.last_page}
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                     <Button
                         variant="outline"
                         size="sm"
@@ -69,7 +69,7 @@ const DashboardClientPage = () => {
                         Previous
                     </Button>
 
-                    <div className="flex max-w-full flex-wrap items-center gap-1">
+                    <div className="flex max-w-full items-center gap-1 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
                         {
                             Array.from({ length: totalPage ?? 0 }, (_, i) => (
                             <Button
@@ -119,11 +119,11 @@ const DashboardClientPage = () => {
         //if (meta?.total <= 1) return null
 
         return (
-            <div className="mt-4 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                <div className="text-sm text-muted-foreground">
+            <div className="mt-4 flex min-w-0 flex-col gap-3 border-t pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <div className="shrink-0 text-sm text-muted-foreground">
                     Showing {metaProgress?.current_page} of {metaProgress?.last_page}
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                     <Button
                         variant="outline"
                         size="sm"
@@ -134,7 +134,7 @@ const DashboardClientPage = () => {
                         Previous
                     </Button>
 
-                    <div className="flex max-w-full flex-wrap items-center gap-1">
+                    <div className="flex max-w-full items-center gap-1 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
                         {Array.from({ length: metaProgress?.last_page ?? 0 }, (_, i) => (
                             <Button
                                 key={i + 1}
@@ -165,16 +165,16 @@ const DashboardClientPage = () => {
     const renderGenericList = (items: ProgressReport[]) => (
         <div className="space-y-3">
             {items.map((item) => (
-                <Card key={item.id} className="p-4">
+                <Card key={item.id} className="min-w-0 p-3 sm:p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0">
                             <h4 className="font-medium">{bulanIndo[parseInt(item.bulan, 10) - 1]} {item.tahun}</h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="break-words text-sm text-muted-foreground">
                                 {item.nama_jasa}
                             </p>
                         </div>
-                        <div className="break-words text-left sm:text-right">
-                           <a href={`/progress/detail/${item.id}`} target="_blank">{item.nomor} / {convertIndonesiaFormat(item.tanggal)}</a>
+                        <div className="min-w-0 text-left sm:text-right">
+                           <a href={`/progress/detail/${item.id}`} target="_blank" className="block break-all text-primary hover:underline">{item.nomor} / {convertIndonesiaFormat(item.tanggal)}</a>
                         </div>
                     </div>
                 </Card>
@@ -196,27 +196,27 @@ const DashboardClientPage = () => {
 
     return (
         <div className="mx-auto w-full min-w-0">
-            <h1 className="text-2xl font-bold mb-6">Progress Report</h1>
+            <h1 className="mb-4 text-xl font-bold sm:mb-6 sm:text-2xl">Progress Report</h1>
 
             {renderParentPagination()}
 
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion type="single" collapsible className="w-full min-w-0">
                 {clients.map((category) => {
                     const IconComponent = Users
 
                     return (
-                        <AccordionItem key={category.id} value={category.customer_code}>
-                            <AccordionTrigger onClick={() => handleAccordionChange(category.customer_code)} className="text-left">
-                                <div className="flex items-center gap-2">
-                                    <IconComponent className="w-5 h-5" />
-                                    {category.company_name}
+                        <AccordionItem key={category.id} value={category.customer_code} className="min-w-0">
+                            <AccordionTrigger onClick={() => handleAccordionChange(category.customer_code)} className="min-w-0 text-left">
+                                <div className="flex min-w-0 items-center gap-2">
+                                    <IconComponent className="h-5 w-5 shrink-0" />
+                                    <span className="truncate">{category.company_name}</span>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent>
+                            <AccordionContent className="min-w-0">
                                 {loadingChild ? (
-                                    <div className="flex items-center justify-center py-8">
-                                        <Loader2 className="w-6 h-6 animate-spin" />
-                                        <span className="ml-2">Loading {category.company_name.toLowerCase()}...</span>
+                                    <div className="flex min-w-0 items-center justify-center py-8">
+                                        <Loader2 className="h-6 w-6 shrink-0 animate-spin" />
+                                        <span className="ml-2 truncate">Loading {category.company_name.toLowerCase()}...</span>
                                     </div>
                                 ) : progressReport.length > 0 ? (
                                     <>

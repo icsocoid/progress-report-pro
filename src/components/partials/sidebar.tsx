@@ -141,15 +141,23 @@ function SidebarNavigationItem({item, active}: { item: NavigationItem; active: b
 
     return (
         <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
+            <SidebarMenuButton
+                asChild
+                isActive={active}
+                tooltip={item.title}
+                className={cn(
+                    "border border-transparent text-sidebar-foreground/80 hover:border-primary/25 hover:bg-primary/10 hover:text-primary",
+                    active && "border-[#211313] bg-primary/10 text-primary shadow-sm"
+                )}
+            >
                 {item.external ? (
                     <a href={item.path} target="_blank" rel="noreferrer" className="group">
-                        <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />
+                        <Icon className="h-4 w-4 transition-colors" />
                         <span>{item.title}</span>
                     </a>
                 ) : (
                     <Link to={item.path} className="group">
-                        <Icon className="h-4 w-4 transition-colors group-hover:text-primary" />
+                        <Icon className="h-4 w-4 transition-colors" />
                         <span>{item.title}</span>
                     </Link>
                 )}
@@ -172,13 +180,13 @@ export function DashboardSidebar() {
     const settingItems = getItems("setting");
 
     return (
-        <Sidebar className="border-r">
+        <Sidebar className="border-r border-sidebar-border bg-sidebar">
             <SidebarHeader className="pb-0">
                 <div className="flex items-center gap-2 px-4 py-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary shadow-sm">
                         <Layers className="h-4 w-4 text-primary-foreground" />
                     </div>
-                    <span className="text-xl font-bold">ALS</span>
+                    <span className="text-xl font-bold text-sidebar-foreground">ALS</span>
                 </div>
             </SidebarHeader>
 
@@ -255,15 +263,17 @@ export function DashboardSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <div className="p-4">
-                    <div className="flex items-center gap-3 rounded-lg border p-3">
-                        <Avatar className="h-9 w-9">
+                <div className="min-w-0 p-4">
+                    <div className="flex min-w-0 items-center gap-3 overflow-hidden rounded-lg border border-primary/20 bg-primary/5 p-3">
+                        <Avatar className="h-9 w-9 shrink-0">
                             <AvatarImage src="/placeholder.svg?height=36&width=36" alt="@username" />
-                            <AvatarFallback>{getInitialsLimited(user?.employee_name || "AL")}</AvatarFallback>
+                            <AvatarFallback className="bg-primary text-primary-foreground">{getInitialsLimited(user?.employee_name || "AL")}</AvatarFallback>
                         </Avatar>
-                        <div className="flex flex-col">
-                            <span className="text-sm font-medium">{user?.employee_name}</span>
-                            <span className="text-xs text-muted-foreground">{shortenEmail(user?.email || "")}</span>
+                        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+                            <span className="truncate text-sm font-medium">{user?.employee_name}</span>
+                            <span className="block max-w-full truncate text-xs text-muted-foreground" title={user?.email || ""}>
+                                {shortenEmail(user?.email || "")}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -284,7 +294,7 @@ export function MobileBottomNavigation() {
         .some((item) => isNavigationItemActive(location.pathname, item));
 
     return (
-        <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur md:hidden">
+        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-primary/15 bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 shadow-[0_-8px_24px_rgba(226,35,26,0.08)] backdrop-blur md:hidden">
             <div className="grid grid-cols-5 gap-1 px-1">
                 {items.map((item) => {
                     const Icon = item.icon;
@@ -296,8 +306,8 @@ export function MobileBottomNavigation() {
                             to={item.path}
                             aria-current={active ? "page" : undefined}
                             className={cn(
-                                "flex min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-center text-[10px] font-medium leading-tight text-muted-foreground transition-colors",
-                                active && "bg-primary text-primary-foreground"
+                                "flex min-w-0 flex-col items-center justify-center gap-1 rounded-md border border-transparent px-1 py-2 text-center text-[10px] font-medium leading-tight text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary",
+                                active && "border-[#211313] bg-primary/10 text-primary"
                             )}
                         >
                             <Icon className="h-5 w-5 shrink-0" />
@@ -310,8 +320,8 @@ export function MobileBottomNavigation() {
                     aria-current={isMenuActive ? "page" : undefined}
                     onClick={() => setOpenMobile(true)}
                     className={cn(
-                        "flex min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-center text-[10px] font-medium leading-tight text-muted-foreground transition-colors",
-                        isMenuActive && "bg-primary text-primary-foreground"
+                        "flex min-w-0 flex-col items-center justify-center gap-1 rounded-md border border-transparent px-1 py-2 text-center text-[10px] font-medium leading-tight text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary",
+                        isMenuActive && "border-[#211313] bg-primary/10 text-primary"
                     )}
                 >
                     <Menu className="h-5 w-5 shrink-0" />
