@@ -7,6 +7,8 @@ import {useEffect} from "react";
 import {convertIndonesiaFormat} from "@/utils/helpers.ts";
 import type {JobTask} from "@/models/job.ts";
 import {useToast} from "@/hooks/use-toast.ts";
+import NoteImageUpload from "@/components/pages/progress/NoteImageUpload.tsx";
+import type {FileWithPreview} from "@/models/progress.ts";
 
 const TodoPekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
 
@@ -14,26 +16,6 @@ const TodoPekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
     const removeInvalidTasks = () => {
         const updatedJobs = dataProgress.spk.job.map((job) => {
             const completedTasks: JobTask[] = job.task_done || [];
-            const filteredTasks = job.tasks.filter((task) => {
-                // tampilkam semua task per job
-                const allOldTasksForThisId = dataProgress.old_job?.flatMap((oldJob) =>
-                    oldJob.tasks.filter(t => t.job_task_id === task.id)
-                ) || [];
-
-                // cek jika ada tanggal_selesai !== ""
-                const isCompletedSomewhere = allOldTasksForThisId.find(t => t.tanggal_selesai !== "");
-                if (isCompletedSomewhere) {
-                    const newJobTask = {
-                        ...task,
-                        tanggal_selesai: isCompletedSomewhere.tanggal_selesai // ambil dari versi lama
-                    };
-                    completedTasks.push(newJobTask);
-                    //completedTasks.push(task);
-                }
-                // pertahankan task jika belum completed
-                return !isCompletedSomewhere;
-            });
-
             return {
                 ...job,
                 task_done: completedTasks
@@ -90,7 +72,7 @@ const TodoPekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
                                                             ...td,
                                                             job_task_note: [
                                                                 ...(td.job_task_note ?? []),
-                                                                { id: crypto.randomUUID(), note: "" }
+                                                                { id: crypto.randomUUID(), note: "", images: [] }
                                                             ]
                                                         }
                                                         : td
@@ -102,7 +84,7 @@ const TodoPekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
                                             ...task,
                                             job_task_note: [
                                                 ...(task.job_task_note ?? []),
-                                                { id: crypto.randomUUID(), note: "" }
+                                                { id: crypto.randomUUID(), note: "", images: [] }
                                             ]
                                         };
                                     }
@@ -221,6 +203,58 @@ const TodoPekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
             };
         });
     };
+
+    const updateNoteImages = (jobId: string, taskId: string, noteId: string, images: FileWithPreview[]) => {
+        setDataProgress(prev => {
+            if (!prev) return prev;
+
+            return {
+                ...prev,
+                spk: {
+                    ...prev.spk,
+                    job: prev.spk.job.map(job =>
+                        job.id === jobId
+                            ? {
+                                ...job,
+                                tasks: job.tasks.map(task => {
+                                    if (task.id === taskId && task.job_task_note) {
+                                        return {
+                                            ...task,
+                                            job_task_note: task.job_task_note.map(note =>
+                                                note.id === noteId
+                                                    ? { ...note, images }
+                                                    : note
+                                            )
+                                        };
+                                    }
+
+                                    if (task.todo) {
+                                        return {
+                                            ...task,
+                                            todo: task.todo.map(td =>
+                                                td.id === taskId && td.job_task_note
+                                                    ? {
+                                                        ...td,
+                                                        job_task_note: td.job_task_note.map(note =>
+                                                            note.id === noteId
+                                                                ? { ...note, images }
+                                                                : note
+                                                        )
+                                                    }
+                                                    : td
+                                            )
+                                        };
+                                    }
+
+                                    return task;
+                                })
+                            }
+                            : job
+                    )
+                }
+            };
+        });
+    };
     const handleTaskCheckChange = (jobId: string, taskId: string, checked: boolean) => {
 
         setDataProgress(prevReport => ({
@@ -311,81 +345,94 @@ const TodoPekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
                                                                 </div>
                                                             </div>
                                                             <div className="ml-4">
-                                                            {
-
-                                                                task.todo && task.todo.length > 0 && task.todo.map((tsk) => {
-                                                                    return(
-                                                                        <>
-                                                                        <div className="flex items-center justify-between gap-3 mb-2">
-                                                                            <div className="gap-3">
-                                                                                <Checkbox
-                                                                                    id={`task-${tsk.id}`}
-                                                                                />
-                                                                                <label
-                                                                                    htmlFor={`task-${tsk.id}`}
-                                                                                    className="mx-1 font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                                                                >
-                                                                                    {tsk.task_name}
-                                                                                </label>
-                                                                            </div>
-                                                                            <Button type="button" variant="outline" size="sm" onClick={() => addNoteToTask(jobProgress.id, task.id, tsk.id)}>
-                                                                                <PlusCircle className="h-4 w-4 mr-2"/>
-                                                                                Tambah
-                                                                            </Button>
-                                                                        </div>
-                                                                        {tsk.job_task_note && tsk.job_task_note.length > 0 && (
-                                                                            <div className="ml-8 space-y-2">
-                                                                                {tsk.job_task_note.map((note, index) => (
-                                                                                    <div key={note.id} className="flex items-center gap-2">
-                                                                                        <div className="flex-1">
-                                                                                            <Textarea
-                                                                                                placeholder="Keterangan..."
-                                                                                                value={note.note || ""}
-                                                                                                onChange={(e) =>
-                                                                                                    updateNote(jobProgress.id, tsk.id, note.id, e.target.value)
-                                                                                                }
-                                                                                                className="min-h-[80px]"
-                                                                                            />
-                                                                                        </div>
-                                                                                        <Button
-                                                                                            type="button"
-                                                                                            variant="ghost"
-                                                                                            size="icon"
-                                                                                            onClick={() => removeNote(jobProgress.id, tsk.id, note.id)}
-                                                                                            className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                                                                                        >
-                                                                                            <Trash2 className="h-4 w-4"/>
-                                                                                            <span className="sr-only">Remove note</span>
-                                                                                        </Button>
-                                                                                    </div>
-                                                                                ))}
-                                                                            </div>
-                                                                        )}
-                                                                        </>
-                                                                    )
-                                                                })
-                                                            }
-                                                                {dataProgress.old_job &&
-                                                                    dataProgress.old_job.length > 0 &&
-                                                                    dataProgress.old_job.flatMap((jb) =>
+                                                                {task.todo && task.todo.length > 0 && task.todo.map((tsk) => {
+                                                                    const oldNotesForTodo = dataProgress.old_job?.flatMap((jb) =>
                                                                         jb.tasks
                                                                             .filter((t) => t.job_task_id === task.id)
-                                                                            .flatMap((t) =>
-                                                                                t.job_task_note.map((note) => (
-                                                                                    <div key={note.id} className="flex items-center justify-between gap-2">
-                                                                                        <div className="flex-1">
-                                                                                            <p className="text-sm text-foreground mb-3">{note.note || ""}</p>
-                                                                                        </div>
-                                                                                        <div className="text-right">
-                                                                                            <p className="text-sm text-foreground mb-3">{jb.progress_report.nomor} {convertIndonesiaFormat(jb.progress_report.tanggal)}</p>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                ))
-                                                                            )
-                                                                    )}
+                                                                            .flatMap((oldTask) => {
+                                                                                if (oldTask.todo && oldTask.todo.length > 0) {
+                                                                                    return oldTask.todo
+                                                                                        .filter((td) => td.task_name === tsk.task_name)
+                                                                                        .flatMap((td) =>
+                                                                                            (td.job_task_note ?? [])
+                                                                                                .filter((n) => n.note?.trim() !== "")
+                                                                                                .map((n) => ({
+                                                                                                    id: `${jb.id}-${oldTask.id}-${td.id}-${n.id}`,
+                                                                                                    note: n.note,
+                                                                                                    report: `${jb.progress_report.nomor} ${convertIndonesiaFormat(jb.progress_report.tanggal)}`,
+                                                                                                }))
+                                                                                        );
+                                                                                }
+                                                                                return [];
+                                                                            })
+                                                                    ) || [];
 
-                                                                {/* Tampilkan notes untuk todo ini */}
-
+                                                                    return (
+                                                                        <div key={tsk.id} className="relative">
+                                                                            <div className="flex items-center justify-between gap-3 mb-1">
+                                                                                <div className="gap-3">
+                                                                                    <Checkbox
+                                                                                        id={`task-${tsk.id}`}
+                                                                                    />
+                                                                                    <label
+                                                                                        htmlFor={`task-${tsk.id}`}
+                                                                                        className="mx-1 font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                                                                    >
+                                                                                        {tsk.task_name}
+                                                                                    </label>
+                                                                                </div>
+                                                                                <Button type="button" variant="outline" size="sm" onClick={() => addNoteToTask(jobProgress.id, task.id, tsk.id)}>
+                                                                                    <PlusCircle className="h-4 w-4 mr-2"/>
+                                                                                    Tambah
+                                                                                </Button>
+                                                                            </div>
+                                                                            {tsk.job_task_note && tsk.job_task_note.length > 0 && (
+                                                                                <div className="ml-6 pl-3 border-l-2 border-muted space-y-2 mt-1 mb-2">
+                                                                                    {tsk.job_task_note.map((note) => (
+                                                                                        <div key={note.id} className="flex items-center gap-2">
+                                                                                            <div className="flex-1">
+                                                                                                <Textarea
+                                                                                                    placeholder="Keterangan..."
+                                                                                                    value={note.note || ""}
+                                                                                                    onChange={(e) =>
+                                                                                                        updateNote(jobProgress.id, tsk.id, note.id, e.target.value)
+                                                                                                    }
+                                                                                                    className="min-h-[80px]"
+                                                                                                />
+                                                                                                <div className="mt-2">
+                                                                                                    <NoteImageUpload
+                                                                                                        images={note.images ?? []}
+                                                                                                        onChange={(images) => updateNoteImages(jobProgress.id, tsk.id, note.id, images)}
+                                                                                                    />
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="ghost"
+                                                                                                size="icon"
+                                                                                                onClick={() => removeNote(jobProgress.id, tsk.id, note.id)}
+                                                                                                className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                                                                                            >
+                                                                                                <Trash2 className="h-4 w-4"/>
+                                                                                                <span className="sr-only">Remove note</span>
+                                                                                            </Button>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )}
+                                                                            {oldNotesForTodo.length > 0 && (
+                                                                                <div className="ml-6 pl-3 border-l-2 border-muted space-y-1 mt-1 mb-2">
+                                                                                    {oldNotesForTodo.map((item) => (
+                                                                                        <div key={item.id} className="mt-1">
+                                                                                            <p className="text-xs text-muted-foreground">{item.report}</p>
+                                                                                            <p className="text-sm text-foreground">{item.note}</p>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )
+                                                                })}
                                                             </div>
 
                                                         </div>

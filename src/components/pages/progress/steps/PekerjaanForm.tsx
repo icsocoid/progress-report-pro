@@ -7,6 +7,8 @@ import {useEffect} from "react";
 import {convertIndonesiaFormat} from "@/utils/helpers.ts";
 import type {JobTask} from "@/models/job.ts";
 import {useToast} from "@/hooks/use-toast.ts";
+import NoteImageUpload from "@/components/pages/progress/NoteImageUpload.tsx";
+import type {FileWithPreview} from "@/models/progress.ts";
 
 const PekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
 
@@ -14,25 +16,6 @@ const PekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
     const removeInvalidTasks = () => {
         const updatedJobs = dataProgress.spk.job.map((job) => {
             const completedTasks: JobTask[] = job.task_done || [];
-            const filteredTasks = job.tasks.filter((task) => {
-                // tampilkam semua task per job
-                const allOldTasksForThisId = dataProgress.old_job?.flatMap((oldJob) =>
-                    oldJob.tasks.filter(t => t.job_task_id === task.id)
-                ) || [];
-
-                // cek jika ada tanggal_selesai !== ""
-                const isCompletedSomewhere = allOldTasksForThisId.find(t => t.tanggal_selesai !== "");
-                if (isCompletedSomewhere) {
-                    const newJobTask = {
-                        ...task,
-                        tanggal_selesai: isCompletedSomewhere.tanggal_selesai // ambil dari versi lama
-                    };
-                    completedTasks.push(newJobTask);
-                    //completedTasks.push(task);
-                }
-                // pertahankan task jika belum completed
-                return !isCompletedSomewhere;
-            });
 
             return {
                 ...job,
@@ -84,7 +67,7 @@ const PekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
                                             ...task,
                                             job_task_note: [
                                                 ...(task.job_task_note ?? []), // ✅ default ke array kosong
-                                                { id: crypto.randomUUID(), note: "" }
+                                                { id: crypto.randomUUID(), note: "", images: [] }
                                             ]
                                         }
                                         : task
@@ -156,6 +139,38 @@ const PekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
             };
         });
     };
+
+    const updateNoteImages = (jobId: string, taskId: string, noteId: string, images: FileWithPreview[]) => {
+        setDataProgress(prev => {
+            if (!prev) return prev;
+
+            return {
+                ...prev,
+                spk: {
+                    ...prev.spk,
+                    job: prev.spk.job.map(job =>
+                        job.id === jobId
+                            ? {
+                                ...job,
+                                tasks: job.tasks.map(task =>
+                                    task.id === taskId
+                                        ? {
+                                            ...task,
+                                            job_task_note: task.job_task_note.map(note =>
+                                                note.id === noteId
+                                                    ? { ...note, images }
+                                                    : note
+                                            )
+                                        }
+                                        : task
+                                )
+                            }
+                            : job
+                    )
+                }
+            };
+        });
+    };
     const handleTaskCheckChange = (jobId: string, taskId: string, checked: boolean) => {
 
         setDataProgress(prevReport => ({
@@ -204,13 +219,13 @@ const PekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
 
                                         <div className="border rounded-md divide-y">
                                             {jobProgress.tasks.map((task) => {
-                                                    const allOldTasksForThisId = dataProgress.old_job?.flatMap((oldJob) =>
-                                                        oldJob.tasks.filter(t => t.job_task_id === task.id)
-                                                    ) || [];
+                                                const allOldTasksForThisId = dataProgress.old_job?.flatMap((oldJob) =>
+                                                    oldJob.tasks.filter(t => t.job_task_id === task.id)
+                                                ) || [];
 
-                                                    // cek jika ada tanggal_selesai !== ""
-                                                    const isCompletedSomewhere = allOldTasksForThisId.find(t => t.tanggal_selesai !== "");
-                                                    if(isCompletedSomewhere) return null;
+                                                // cek jika ada tanggal_selesai !== ""
+                                                const isCompletedSomewhere = allOldTasksForThisId.find(t => t.tanggal_selesai !== "");
+                                                if(isCompletedSomewhere) return null;
                                                 return (
                                                     <div key={task.id} className="p-4">
                                                         <div className="grid gap-4">
@@ -280,6 +295,12 @@ const PekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
                                                                             }
                                                                             className="min-h-[80px]"
                                                                         />
+                                                                        <div className="mt-2">
+                                                                            <NoteImageUpload
+                                                                                images={note.images ?? []}
+                                                                                onChange={(images) => updateNoteImages(jobProgress.id, task.id, note.id, images)}
+                                                                            />
+                                                                        </div>
                                                                     </div>
                                                                     <Button
                                                                         type="button"
@@ -288,8 +309,8 @@ const PekerjaanForm = ({dataProgress, setDataProgress}: DataProgress) => {
                                                                         onClick={() => removeNote(jobProgress.id, task.id, note.id)}
                                                                         className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                                                                     >
-                                                                    <Trash2 className="h-4 w-4"/>
-                                                                    <span className="sr-only">Remove task</span>
+                                                                        <Trash2 className="h-4 w-4"/>
+                                                                        <span className="sr-only">Remove task</span>
                                                                     </Button>
                                                                 </div>
                                                             ))}
