@@ -146,8 +146,8 @@ function SidebarNavigationItem({item, active}: { item: NavigationItem; active: b
                 isActive={active}
                 tooltip={item.title}
                 className={cn(
-                    "border border-transparent text-sidebar-foreground/80 hover:border-primary/25 hover:bg-primary/10 hover:text-primary",
-                    active && "border-[#211313] bg-primary/10 text-primary shadow-sm"
+                    "border border-transparent text-sidebar-foreground/80 hover:border-primary hover:bg-primary/10 hover:text-primary",
+                    active && "border-primary/25 bg-primary/10 text-primary shadow-sm"
                 )}
             >
                 {item.external ? (
@@ -180,11 +180,11 @@ export function DashboardSidebar() {
     const settingItems = getItems("setting");
 
     return (
-        <Sidebar className="border-r border-sidebar-border bg-sidebar">
+        <Sidebar className="border-r border-sidebar-border ">
             <SidebarHeader className="pb-0">
                 <div className="flex items-center gap-2 px-4 py-4">
                     <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary shadow-sm">
-                        <Layers className="h-4 w-4 text-primary-foreground" />
+                        <Layers className="h-4 w-4 " />
                     </div>
                     <span className="text-xl font-bold text-sidebar-foreground">ALS</span>
                 </div>

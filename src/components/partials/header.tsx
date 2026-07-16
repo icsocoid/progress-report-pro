@@ -14,7 +14,7 @@ const Header = () => {
     }
 
     return (
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-primary/10 bg-background/95 px-4 shadow-[0_4px_20px_rgba(226,35,26,0.04)] backdrop-blur md:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-primary/10 bg-white px-4 shadow-2xl] md:px-6">
             <div className="flex min-w-0 items-center gap-2 md:hidden">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary">
                     <Layers className="h-4 w-4 text-primary-foreground" />
