@@ -1,5 +1,5 @@
-import {type ChangeEvent, useEffect, useRef} from "react";
-import {ImagePlus, X} from "lucide-react";
+import {type ChangeEvent, useCallback, useEffect, useRef} from "react";
+import {Clipboard, ImagePlus, X} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import type {FileWithPreview} from "@/models/progress.ts";
 import {formatFileSize} from "@/utils/helpers.ts";
@@ -14,6 +14,7 @@ type NoteImageUploadProps = {
 
 const NoteImageUpload = ({images = [], onChange}: NoteImageUploadProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const {toast} = useToast();
 
     useEffect(() => {
@@ -26,9 +27,61 @@ const NoteImageUpload = ({images = [], onChange}: NoteImageUploadProps) => {
         };
     }, []);
 
+    const processImageFile = useCallback((file: File) => {
+        if (!file.type.startsWith("image/") || file.size > MAX_IMAGE_SIZE) {
+            toast({
+                title: "Peringatan!",
+                description: `File harus berupa gambar dan maksimal 1 MB: ${file.name}`,
+                duration: 3000,
+            });
+            return;
+        }
+
+        const validImage: FileWithPreview = {
+            id: crypto.randomUUID(),
+            file,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            preview: URL.createObjectURL(file),
+        };
+
+        images.forEach((image) => {
+            if (image.preview) {
+                URL.revokeObjectURL(image.preview);
+            }
+        });
+        onChange([validImage]);
+    }, [images, onChange, toast]);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handlePaste = (e: ClipboardEvent) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (const item of items) {
+                if (item.type.startsWith("image/")) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    if (file) {
+                        processImageFile(file);
+                    }
+                    break;
+                }
+            }
+        };
+
+        container.addEventListener("paste", handlePaste);
+        return () => {
+            container.removeEventListener("paste", handlePaste);
+        };
+    }, [processImageFile]);
+
     const handleSelectFiles = (event: ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = Array.from(event.target.files ?? []);
-        const validImages: FileWithPreview[] = [];
         const rejectedNames: string[] = [];
 
         selectedFiles.forEach((file) => {
@@ -36,15 +89,6 @@ const NoteImageUpload = ({images = [], onChange}: NoteImageUploadProps) => {
                 rejectedNames.push(file.name);
                 return;
             }
-
-            validImages.push({
-                id: crypto.randomUUID(),
-                file,
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                preview: URL.createObjectURL(file),
-            });
         });
 
         if (rejectedNames.length > 0) {
@@ -55,13 +99,9 @@ const NoteImageUpload = ({images = [], onChange}: NoteImageUploadProps) => {
             });
         }
 
-        if (validImages.length > 0) {
-            images.forEach((image) => {
-                if (image.preview) {
-                    URL.revokeObjectURL(image.preview);
-                }
-            });
-            onChange([validImages[0]]);
+        const validFile = selectedFiles.find(f => f.type.startsWith("image/") && f.size <= MAX_IMAGE_SIZE);
+        if (validFile) {
+            processImageFile(validFile);
         }
 
         event.target.value = "";
@@ -77,13 +117,16 @@ const NoteImageUpload = ({images = [], onChange}: NoteImageUploadProps) => {
     };
 
     return (
-        <div className="space-y-2">
+        <div ref={containerRef} className="space-y-2" tabIndex={0}>
             <div className="flex flex-wrap items-center gap-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
                     <ImagePlus className="h-4 w-4 mr-2"/>
                     Gambar
                 </Button>
-                <span className="text-xs text-muted-foreground">Maks. 1 MB</span>
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clipboard className="h-3 w-3"/>
+                    Paste (Ctrl+V) &middot; Maks. 1 MB
+                </span>
             </div>
 
             <input
