@@ -2,13 +2,11 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import {
     AlertCircle,
-    BarChart3,
     CheckCircle2,
     FileText,
     Users,
 } from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {Progress} from "@/components/ui/progress.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {bulanIndo, convertIndonesiaFormat} from "@/utils/helpers.ts";
@@ -122,8 +120,6 @@ const emptyDashboard: DashboardData = {
 const toNumber = (value: number | string | undefined) => Number(value ?? 0);
 
 const formatNumber = (value: number | string | undefined) => new Intl.NumberFormat("id-ID").format(toNumber(value));
-
-const formatPercent = (value: number | string | undefined) => `${toNumber(value).toFixed(0)}%`;
 
 const getStatusBadgeVariant = (status: string) => {
     const normalizedStatus = status.trim().toLowerCase();
@@ -298,71 +294,6 @@ const DashboardOverview = () => {
                         </Card>
                     );
                 })}
-            </div>
-
-            <div className="grid gap-4 xl:grid-cols-3">
-                <Card className="border-primary/15 bg-white xl:col-span-2">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="flex items-center gap-2 text-lg text-primary">
-                            <BarChart3 className="h-5 w-5" />
-                            Ringkasan Pekerjaan
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-5">
-                        <div>
-                            <div className="mb-2 flex items-center justify-between text-sm">
-                                <span className="font-medium">Task selesai</span>
-                                <span className="text-muted-foreground">
-                                    {formatPercent(dashboard.summary.task_completion_rate)}
-                                </span>
-                            </div>
-                            <Progress value={dashboard.summary.task_completion_rate} />
-                            <p className="mt-2 text-xs text-muted-foreground">
-                                {formatNumber(dashboard.summary.completed_tasks)} dari {formatNumber(dashboard.summary.total_tasks)} task
-                            </p>
-                        </div>
-
-                        <div>
-                            <div className="mb-2 flex items-center justify-between text-sm">
-                                <span className="font-medium">Todo selesai</span>
-                                <span className="text-muted-foreground">
-                                    {formatPercent(dashboard.summary.todo_completion_rate)}
-                                </span>
-                            </div>
-                            <Progress value={dashboard.summary.todo_completion_rate} />
-                            <p className="mt-2 text-xs text-muted-foreground">
-                                {formatNumber(dashboard.summary.completed_todos)} dari {formatNumber(dashboard.summary.total_todos)} todo
-                            </p>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-3">
-                            {dashboard.per_status.map((item) => (
-                                <div key={item.status_progress} className="rounded-md border border-primary/10 bg-[#fff8f7] p-3">
-                                    <Badge variant={getStatusBadgeVariant(item.status_progress)}>
-                                        {item.status_progress}
-                                    </Badge>
-                                    <p className="mt-3 text-xl font-semibold">{formatNumber(item.total)}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-primary/20 bg-[#fff1ef]">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-lg text-primary">Per Bulan</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="max-h-64 space-y-3 overflow-y-auto pr-2">
-                            {dashboard.per_month.map((item) => (
-                                <div key={`${item.bulan}-${item.tahun}`} className="flex items-center justify-between gap-3 rounded-md bg-white/80 px-3 py-2 shadow-sm">
-                                    <span className="text-sm">{getMonthLabel(item.bulan, item.tahun)}</span>
-                                    <span className="font-semibold text-primary">{formatNumber(item.total)}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
 
             <div className="grid gap-4 xl:grid-cols-2">
