@@ -14,6 +14,8 @@ import {useUser} from "@/models/user.ts";
 import OtherForm from "@/components/pages/progress/steps/OtherForm.tsx";
 import * as React from "react";
 import TodoPerkerjaanForm from "@/components/pages/progress/steps/TodoPerkerjaanForm.tsx";
+import type {ProgressReport} from "@/models/progress.ts";
+import type {JobTask, JobTaskNote} from "@/models/job.ts";
 
 const steps = [
     { id: "step-1", name: "Informasi" },
@@ -22,6 +24,56 @@ const steps = [
     { id: "step-4", name: "Informasi Lain" },
     { id: "step-5", name: "Review" },
 ]
+
+type NoteImagePayload = {
+    file: File
+}
+
+const sanitizeNotes = (notes: JobTaskNote[] | undefined, noteImages: NoteImagePayload[]) => {
+    return notes?.map((note) => {
+        const {images, ...notePayload} = note;
+
+        if (!images || images.length === 0) {
+            return notePayload;
+        }
+
+        const imageIndex = noteImages.length;
+        noteImages.push({file: images[0].file});
+
+        return {
+            ...notePayload,
+            image_index: imageIndex,
+        };
+    });
+};
+
+const sanitizeTasks = (tasks: JobTask[], noteImages: NoteImagePayload[]): JobTask[] => {
+    return tasks.map((task) => ({
+        ...task,
+        job_task_note: sanitizeNotes(task.job_task_note, noteImages) ?? [],
+        kasus: sanitizeNotes(task.kasus, noteImages) ?? [],
+        todo: task.todo ? sanitizeTasks(task.todo, noteImages) : task.todo,
+    }));
+};
+
+const prepareProgressPayload = (dataProgress: ProgressReport) => {
+    const noteImages: NoteImagePayload[] = [];
+    const {files, ...progressPayload} = dataProgress;
+
+    const payload = {
+        ...progressPayload,
+        spk: {
+            ...dataProgress.spk,
+            job: dataProgress.spk.job.map((job) => ({
+                ...job,
+                tasks: sanitizeTasks(job.tasks, noteImages),
+            })),
+        },
+    };
+
+    return {payload, noteImages};
+};
+
 const AddProgressForm = () => {
     const [currentStep, setCurrentStep] = useState(0)
     const [isComplete, setIsComplete] = useState(false)
@@ -53,21 +105,21 @@ const AddProgressForm = () => {
                             tahun: dataProgress.tahun
                         }
                     }).then(response => {
-                            setLoadingStep(false)
-                            if(response.data.status){
-                                toast({
-                                    title: "Peringatan!",
-                                    description:  response.data.message,
-                                    duration: 3000,
-                                    action: (
-                                        <AlertTriangle className="h-4 w-4 text-red-600" />
-                                    ),
-                                })
-                            } else {
-                                setCurrentStep((prev) => Math.min(prev + 1, steps.length))
-                            }
+                        setLoadingStep(false)
+                        if(response.data.status){
+                            toast({
+                                title: "Peringatan!",
+                                description:  response.data.message,
+                                duration: 3000,
+                                action: (
+                                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                                ),
+                            })
+                        } else {
+                            setCurrentStep((prev) => Math.min(prev + 1, steps.length))
+                        }
 
-                        })
+                    })
                         .catch(error => {
                             setLoadingStep(false)
                             console.error(error);
@@ -112,11 +164,15 @@ const AddProgressForm = () => {
         setIsLoading(true)
         try {
             const formData = new FormData()
+            const {payload, noteImages} = prepareProgressPayload(dataProgress)
             formData.append('user_id', user?.id || '0')
-            formData.append('data', JSON.stringify(dataProgress)) // exclude files
+            formData.append('data', JSON.stringify(payload))
 
             dataProgress.files.forEach((f, i) => {
                 formData.append(`files[${i}]`, f.file)
+            })
+            noteImages.forEach((noteImage, index) => {
+                formData.append(`images[${index}]`, noteImage.file)
             })
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/progress/save`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },

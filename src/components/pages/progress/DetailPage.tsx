@@ -15,9 +15,7 @@ import html2pdf from 'html2pdf.js'
 import type {JobTask} from "@/models/job.ts";
 import {useToast} from "@/hooks/use-toast.ts";
 import SingleFileUpload from "@/components/SingleFileUpload.tsx";
-
-
-
+import {getNoteImageUrls} from "@/utils/noteImages.ts";
 
 type DetailProgressReportPageProps = {
     reportId?: string;
@@ -26,12 +24,31 @@ type DetailProgressReportPageProps = {
     hidePageHeader?: boolean;
 };
 
+const NoteImages = ({note}: {note: unknown}) => {
+    const imageUrls = getNoteImageUrls(note)
+    if (imageUrls.length === 0) return null
+
+    return (
+        <div className="mt-2 flex flex-wrap gap-2">
+            {imageUrls.map((imageUrl, index) => (
+                <a key={`${imageUrl}-${index}`} href={imageUrl} target="_blank" rel="noopener noreferrer">
+                    <img
+                        src={imageUrl}
+                        alt={`Gambar catatan ${index + 1}`}
+                        className="h-24 w-32 rounded-md border object-cover"
+                    />
+                </a>
+            ))}
+        </div>
+    )
+}
+
 const DetailProgressReportPage = ({
-    reportId,
-    embedded = false,
-    hideRequestApprovalButton = false,
-    hidePageHeader = false,
-}: DetailProgressReportPageProps) => {
+                                      reportId,
+                                      embedded = false,
+                                      hideRequestApprovalButton = false,
+                                      hidePageHeader = false,
+                                  }: DetailProgressReportPageProps) => {
     const navigate = useNavigate()
     const [dataProgress, setDataProgress] = React.useState<ProgressReport>(InitProgressReport)
     const [loading, setLoading] = React.useState(true)
@@ -434,6 +451,9 @@ const DetailProgressReportPage = ({
                                                                             <div key={`old-${note.id}`} className="flex items-center justify-between gap-2">
                                                                                 <div className="flex-1">
                                                                                     <p className="p-1 ml-2"> - {note.note || ""}</p>
+                                                                                    <div className="ml-2">
+                                                                                        <NoteImages note={note} />
+                                                                                    </div>
                                                                                 </div>
                                                                                 <div className="text-right">
                                                                                     <p className="text-xs text-foreground mb-3">
@@ -449,7 +469,8 @@ const DetailProgressReportPage = ({
                                                         {/* Catatan dari task itu sendiri */}
                                                         {task.job_task_note?.map((note, index3) => (
                                                             <div key={`note-${index3}`} className="p-1 ml-2">
-                                                                - {note.note}
+                                                                <div>- {note.note}</div>
+                                                                <NoteImages note={note} />
                                                             </div>
                                                         ))}
                                                     </div>
@@ -490,6 +511,9 @@ const DetailProgressReportPage = ({
                                                                         <div key={note.id} className="flex items-center justify-between gap-2">
                                                                             <div className="flex-1">
                                                                                 <p className="p-1 ml-2"> - {note.note || ""}</p>
+                                                                                <div className="ml-2">
+                                                                                    <NoteImages note={note} />
+                                                                                </div>
                                                                             </div>
                                                                             <div className="text-right">
                                                                                 <p className="text-sm text-foreground mb-3">
@@ -506,7 +530,8 @@ const DetailProgressReportPage = ({
                                                     {task.todo && task.todo.length == 0 && task.job_task_note?.map((note) => {
                                                         return (
                                                             <div key={note.id} className="p-1 ml-2">
-                                                                - {note.note}
+                                                                <div>- {note.note}</div>
+                                                                <NoteImages note={note} />
                                                             </div>
                                                         )
                                                     })}
@@ -526,7 +551,8 @@ const DetailProgressReportPage = ({
                                                                 {td.job_task_note?.map((note) => {
                                                                     return (
                                                                         <div key={note.id} className="p-1 ml-4 text-sm">
-                                                                            - {note.note}
+                                                                            <div>- {note.note}</div>
+                                                                            <NoteImages note={note} />
                                                                         </div>
                                                                     )
                                                                 })}
@@ -561,6 +587,9 @@ const DetailProgressReportPage = ({
                                                                             <div key={note.id} className="flex items-start space-x-3">
                                                                                 <div className="flex-1 min-w-0">
                                                                                     <p className="p-1 ml-2"> - {note.note || ""}</p>
+                                                                                    <div className="ml-2">
+                                                                                        <NoteImages note={note} />
+                                                                                    </div>
 
                                                                                     {t.reply && t.reply.length > 0 && (
                                                                                         <div className="space-y-2">
@@ -580,7 +609,8 @@ const DetailProgressReportPage = ({
                                                         {task.kasus?.map((note) => {
                                                             return (
                                                                 <div key={note.id} className="p-1 ml-2">
-                                                                    - {note.note}
+                                                                    <div>- {note.note}</div>
+                                                                    <NoteImages note={note} />
                                                                 </div>
                                                             )
                                                         })}

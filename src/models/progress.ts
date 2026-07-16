@@ -99,6 +99,7 @@ export interface FileWithPreview {
     file: File,
     name?: string,
     size?: number
+    type?: string
 }
 
 export const InitProgressReportTask: ProgressReportTask = {

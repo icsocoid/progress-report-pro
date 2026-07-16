@@ -1,3 +1,4 @@
+import type {FileWithPreview} from "@/models/progress.ts";
 import type {SolusiNote} from "@/models/solusi.ts";
 // import type {TodoTask} from "@/models/todo.ts";
 
@@ -144,6 +145,8 @@ export interface JobTaskNote extends Note{
     showReply?: boolean
     replyContent?: string
     isCollapsed?: boolean
+    images?: FileWithPreview[]
+    image_index?: number
 }
 
 export interface ReplyNote extends Note{
