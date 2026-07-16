@@ -5,7 +5,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {type Client, InitClient} from "@/models/client.ts";
 import {SearchableSelect} from "@/components/SearchableSelect.tsx";
@@ -16,10 +16,11 @@ import {useUser} from "@/models/user.ts";
 
 
 
-const InformasiForm = ({dataProgress, setDataProgress}: DataProgress) => {
+    const InformasiForm = ({dataProgress, setDataProgress}: DataProgress) => {
 
     //const [spks, setSpks] = React.useState<Spk[]>([])
     const [date, setDate] = useState<Date>(new Date())
+    const [isLoadingJobs, setIsLoadingJobs] = useState(false)
     const user = useUser()
 
     const handleSubmit = () => {
@@ -46,6 +47,7 @@ const InformasiForm = ({dataProgress, setDataProgress}: DataProgress) => {
     }
 
     const fetchJob = async (clientCode: string) => {
+        setIsLoadingJobs(true)
         await axios.get(`${urlApi}/api/jobs/findjobspk`, {
             params: {
                 client_code:clientCode,
@@ -67,6 +69,9 @@ const InformasiForm = ({dataProgress, setDataProgress}: DataProgress) => {
             })
             .catch(error => {
                 console.error(error);
+            })
+            .finally(() => {
+                setIsLoadingJobs(false)
             });
     }
 
@@ -157,6 +162,7 @@ const InformasiForm = ({dataProgress, setDataProgress}: DataProgress) => {
                             <label className="text-sm font-medium">Pekerjaan</label>
                             <Select
                                 value={dataProgress.no_spk}
+                                disabled={isLoadingJobs}
                                 onValueChange={(value) => {
                                     const selectedSpk = dataProgress.spks?.find(spk => spk.no_spk === value)
                                     if (selectedSpk) {
@@ -170,7 +176,14 @@ const InformasiForm = ({dataProgress, setDataProgress}: DataProgress) => {
                                 }}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Pilih Pekerjaan" />
+                                    {isLoadingJobs ? (
+                                        <div className="flex items-center gap-2 text-muted-foreground">
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            <span>Memuat data pekerjaan...</span>
+                                        </div>
+                                    ) : (
+                                        <SelectValue placeholder="Pilih Pekerjaan" />
+                                    )}
                                 </SelectTrigger>
                                 <SelectContent>
                                     {
